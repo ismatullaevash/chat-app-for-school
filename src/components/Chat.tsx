@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback, useEffect, useState } from "react";
 
 import {
   MainContainer,
@@ -16,7 +16,7 @@ import {
   VoiceCallButton,
   VideoCallButton,
   InfoButton,
-  Search
+  Search,
 } from "@chatscope/chat-ui-kit-react";
 
 import {
@@ -26,6 +26,7 @@ import {
   MessageDirection,
   MessageStatus,
 } from "@chatscope/use-chat";
+import { users } from "../data/data";
 import { MessageContent, TextContent, User } from "@chatscope/use-chat";
 
 export const Chat = ({ user }: { user: User }) => {
@@ -41,6 +42,7 @@ export const Chat = ({ user }: { user: User }) => {
     setCurrentMessage,
     sendTyping,
     setCurrentUser,
+    updateMessage,
   } = useChat();
 
   useEffect(() => {
@@ -101,6 +103,16 @@ export const Chat = ({ user }: { user: User }) => {
       });
     }
   };
+  const [value, setValue] = useState("Search..");
+  const handleSearch = (text: string) => {
+    setValue(text);
+    users.forEach((u) => {
+      if (text.toLowerCase() == u.name.toLowerCase()) {
+        alert("Contact Found: "+u.name);
+        setActiveConversation(u.name);
+      }
+    });
+  };
 
   const getTypingIndicator = useCallback(() => {
     if (activeConversation) {
@@ -127,14 +139,22 @@ export const Chat = ({ user }: { user: User }) => {
 
   return (
     <MainContainer responsive>
-      <Sidebar position="left" scrollable = {false}>
-      <Search placeholder="Search..." />
+      <Sidebar position="left" scrollable={false}>
         <ConversationHeader style={{ backgroundColor: "#fff" }}>
           <Avatar src={user.avatar} />
           <ConversationHeader.Content>
             {user.username}
+            <br/>
+            <p style={{color:'gray', fontSize:'14px'}}>You</p>
           </ConversationHeader.Content>
         </ConversationHeader>
+        <Search
+          placeholder="Search..."
+          value={value}
+          onChange={handleSearch}
+          onClearClick={() => setValue("")}
+        />
+
         <ConversationList>
           {conversations.map((c) => {
             // Helper for getting the data of the first participant
